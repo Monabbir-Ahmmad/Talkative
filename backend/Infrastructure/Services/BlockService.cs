@@ -10,23 +10,17 @@ namespace Infrastructure.Services;
 
 public class BlockService : IBlock
 {
-    private readonly IConfiguration _configuration;
     private readonly IMongoCollection<User>? _userCollection;
 
     public BlockService(
-        IOptions<UserDatabaseConfig> userDatabaseConfig,
-        IConfiguration configuration
     )
     {
-        var mongoClient = new MongoClient(userDatabaseConfig.Value.ConnectionString);
-
-        var mongoDatabase = mongoClient.GetDatabase(userDatabaseConfig.Value.DatabaseName);
+        var mongoClient = new MongoClient(Environment.GetEnvironmentVariable("ConnectionString"));
+        var mongoDatabase = mongoClient.GetDatabase(Environment.GetEnvironmentVariable("DatabaseName"));
 
         _userCollection = mongoDatabase.GetCollection<User>(
-            userDatabaseConfig.Value.UserCollectionName
+            Environment.GetEnvironmentVariable("UserCollectionName")
         );
-
-        _configuration = configuration;
     }
 
     public async Task<Dictionary<string, bool>> GetBlockedUserIds(string userId)

@@ -1,8 +1,6 @@
 ﻿using Application.Common.Interface;
 using Application.Common.ViewModels;
 using Domain.Entities;
-using Infrastructure.DbConfig;
-using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -12,14 +10,13 @@ public class RetweetService : IRetweet
 {
     private readonly IMongoCollection<Tweet> _tweetCollection;
 
-    public RetweetService(IOptions<TweetDatabaseConfig> tweetDatabaseConfig)
+    public RetweetService()
     {
-        var mongoClient = new MongoClient(tweetDatabaseConfig.Value.ConnectionString);
-
-        var mongoDatabase = mongoClient.GetDatabase(tweetDatabaseConfig.Value.DatabaseName);
+        var mongoClient = new MongoClient(Environment.GetEnvironmentVariable("ConnectionString"));
+        var mongoDatabase = mongoClient.GetDatabase(Environment.GetEnvironmentVariable("DatabaseName"));
 
         _tweetCollection = mongoDatabase.GetCollection<Tweet>(
-            tweetDatabaseConfig.Value.TweetCollectionName
+            Environment.GetEnvironmentVariable("TweetCollectionName")
         );
     }
 
@@ -43,7 +40,8 @@ public class RetweetService : IRetweet
             .Lookup("users", "retweetUsers", "_id", "users")
             .Unwind("users")
             .ReplaceRoot<User>("$users")
-            .Project(user => new UserVm { UserId = user.Id, Username = user.Username, ProfilePicture = user.ProfilePicture })
+            .Project(user => new UserVm
+            { UserId = user.Id, Username = user.Username, ProfilePicture = user.ProfilePicture })
             .ToListAsync();
     }
 

@@ -3,45 +3,39 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-namespace Infrastructure.DbConfig
+namespace Infrastructure.DbConfig;
+
+public static class DbIndexConfig
 {
-    public static class DbIndexConfig
+    public static IServiceCollection DatabaseIndexConfig(this IServiceCollection services)
     {
-        public static IServiceCollection DatabaseIndexConfig(this IServiceCollection services)
-        {
-            var userDatabaseConfig = services
-                .BuildServiceProvider()
-                .GetRequiredService<IOptions<UserDatabaseConfig>>()
-                .Value;
-            var tweetDatabaseConfig = services
-                .BuildServiceProvider()
-                .GetRequiredService<IOptions<TweetDatabaseConfig>>()
-                .Value;
+        // foreach (var item in Environment.GetEnvironmentVariables().Keys)
+        // {
+        //     Console.WriteLine(item.ToString() + " " + Environment.GetEnvironmentVariable(item.ToString() ?? ""));
+        // }
+        var mongoClient = new MongoClient(Environment.GetEnvironmentVariable("ConnectionString"));
 
-            var mongoClient = new MongoClient(userDatabaseConfig.ConnectionString);
+        var mongoDatabase = mongoClient.GetDatabase(Environment.GetEnvironmentVariable("DatabaseName"));
 
-            var mongoDatabase = mongoClient.GetDatabase(userDatabaseConfig.DatabaseName);
+        var _userCollection = mongoDatabase.GetCollection<User>(
+            Environment.GetEnvironmentVariable("UserCollectionName")
+        );
 
-            var _userCollection = mongoDatabase.GetCollection<User>(
-                userDatabaseConfig.UserCollectionName
-            );
+        var _tweetCollection = mongoDatabase.GetCollection<Tweet>(
+            Environment.GetEnvironmentVariable("TweetCollectionName")
+        );
 
-            var _tweetCollection = mongoDatabase.GetCollection<Tweet>(
-                tweetDatabaseConfig.TweetCollectionName
-            );
+        var userIndexModel = new CreateIndexModel<User>(
+            Builders<User>.IndexKeys.Ascending(x => x.Username)
+        );
+        var tweetIndexModel = new CreateIndexModel<Tweet>(
+            Builders<Tweet>.IndexKeys.Ascending(x => x.Hashtags)
+        );
 
-            var userIndexModel = new CreateIndexModel<User>(
-                Builders<User>.IndexKeys.Ascending(x => x.Username)
-            );
-            var tweetIndexModel = new CreateIndexModel<Tweet>(
-                Builders<Tweet>.IndexKeys.Ascending(x => x.Hashtags)
-            );
+        _userCollection.Indexes.CreateOne(userIndexModel);
 
-            _userCollection.Indexes.CreateOne(userIndexModel);
+        _tweetCollection.Indexes.CreateOne(tweetIndexModel);
 
-            _tweetCollection.Indexes.CreateOne(tweetIndexModel);
-
-            return services;
-        }
+        return services;
     }
 }

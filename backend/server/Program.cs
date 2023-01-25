@@ -2,10 +2,14 @@ using Application;
 using Application.Common.Interface;
 using FluentValidation.AspNetCore;
 using Infrastructure;
-using Infrastructure.DbConfig;
+using server;
 using server.Filters;
 using server.Hub;
 using server.Middlewares;
+
+var root = Directory.GetCurrentDirectory();
+var dotenv = Path.Combine(root, ".env");
+DotEnv.Load(dotenv);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,12 +19,12 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add<BlockActionFilter>();
 });
-
+builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddInfrastructureServices();
 builder.Services.AddLogging(loggingBuilder =>
 {
     loggingBuilder.AddSeq();
