@@ -28,7 +28,7 @@
     "ngx-image-cropper": "^6.3.3",
     "ngx-infinite-scroll": "^14.0.0",
     "rxjs": "~7.5.0",
-    "tailwindcss": "^3.1.8",
+    "tailwindcss": "^3.3.1",
     "tslib": "^2.3.0",
     "zone.js": "~0.13.0"
   },
