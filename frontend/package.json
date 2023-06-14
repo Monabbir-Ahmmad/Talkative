@@ -20,7 +20,7 @@
     "@angular/platform-browser": "^14.1.0",
     "@angular/platform-browser-dynamic": "^15.2.8",
     "@angular/router": "^15.2.8",
-    "@microsoft/signalr": "^6.0.8",
+    "@microsoft/signalr": "^6.0.18",
     "angular-text-input-highlight": "^1.4.3",
     "jwt-decode": "^3.1.2",
     "karma": "^6.4.1",
